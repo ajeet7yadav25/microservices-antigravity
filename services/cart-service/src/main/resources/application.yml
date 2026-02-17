@@ -1,56 +1,5 @@
-server:
-  port: 8086
-
 spring:
   application:
     name: cart-service
-
-  # MongoDB
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/cart_db
-    redis:
-      host: localhost
-      port: 6379
-      timeout: 2000ms
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://localhost:9090/realms/ecommerce/protocol/openid-connect/certs
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
-
-# Resilience4j — circuit breaker for Feign call to Product Service
-resilience4j:
-  circuitbreaker:
-    instances:
-      product-service:
-        sliding-window-size: 10
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 10000
-        permitted-number-of-calls-in-half-open-state: 3
-  retry:
-    instances:
-      product-service:
-        max-attempts: 3
-        wait-duration: 1000
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
-  metrics:
-    tags:
-      application: ${spring.application.name}
-
-logging:
-  level:
-    com.ecommerce.cart: DEBUG
+  config:
+    import: "optional:configserver:http://localhost:8888/"

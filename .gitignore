@@ -53,3 +53,6 @@ infra/terraform/**/*.tfvars
 .env
 .env.*
 !.env.example
+
+# ==================== Local Config Repo ====================
+config-data/
