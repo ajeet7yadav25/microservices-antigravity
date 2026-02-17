@@ -1,0 +1,52 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: product-service
+
+  # MongoDB
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/product_db
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+
+  # Kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all  # Durability guarantee
+      retries: 3
+      properties:
+        enable.idempotence: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9090/realms/ecommerce/protocol/openid-connect/certs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.ecommerce.product: DEBUG

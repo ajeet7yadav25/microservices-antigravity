@@ -1,0 +1,64 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: inventory-service
+
+  # MongoDB
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/inventory_db
+
+  # Kafka Producer/Consumer
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: inventory-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.ecommerce.*
+    # Kafka Streams configuration
+    streams:
+      application-id: inventory-streams
+      properties:
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        state.dir: /tmp/kafka-streams/inventory
+        commit.interval.ms: 1000
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9090/realms/ecommerce/protocol/openid-connect/certs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.ecommerce.inventory: DEBUG
+    org.apache.kafka.streams: INFO

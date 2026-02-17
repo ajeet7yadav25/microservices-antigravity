@@ -1,0 +1,94 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      # Discover routes from Eureka automatically
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      # Explicit route definitions (preferred over discovery locator in production)
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/products/**
+
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/v1/inventory/**
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/v1/orders/**
+
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/payments/**
+
+        - id: cart-service
+          uri: lb://cart-service
+          predicates:
+            - Path=/api/v1/carts/**
+
+  # Redis for rate limiting
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # JWT validation
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Keycloak or custom auth server JWKS endpoint
+          jwk-set-uri: http://localhost:9090/realms/ecommerce/protocol/openid-connect/certs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+# Resilience4j defaults for gateway circuit breakers
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
+        permitted-number-of-calls-in-half-open-state: 3
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 3s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,prometheus
+  endpoint:
+    gateway:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
